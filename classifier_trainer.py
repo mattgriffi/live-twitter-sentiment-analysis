@@ -5,6 +5,16 @@ import random
 
 
 from nltk.tokenize import word_tokenize
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.svm import SVC, LinearSVC, NuSVC
+
+
+class DataSet:
+    def __init__(self):
+        self.labeled_features = None
+        self.all_features = None
 
 
 def load_training_data():
@@ -22,15 +32,29 @@ def load_training_data():
     positive_features = [(positive_features, 'pos')]
     negative_features = [(negative_features, 'neg')]
     all_words = positive_words + negative_words
-    all_features = positive_features + negative_features
-    random.shuffle(all_features)
+    training_set = positive_features + negative_features
+    random.shuffle(training_set)
 
-    classifier = nltk.NaiveBayesClassifier.train(all_features)
+    data = DataSet()
+    data.labeled_features = training_set
+    data.all_features = all_words
 
-    text = "Today, Cirno really pissed me off."
-    tokens = set(word_tokenize(text))
-    test_set = {word: (word in tokens) for word in all_words}
-    print(classifier.classify(test_set))
+    return data
 
-load_training_data()
 
+def train_classifier(classifier, data_set):
+    classifier.train(data_set.labeled_features)
+
+
+data = load_training_data()
+classy = SklearnClassifier(MultinomialNB())
+train_classifier(classy, data)
+
+text = "Today, Cirno was really bad at speedruns."
+text2 = "I am happy today."
+tokens = set(word_tokenize(text))
+tokens2 = set(word_tokenize(text2))
+test_set = {word: (word in tokens) for word in data.all_features}
+test_set2 = {word: (word in tokens2) for word in data.all_features}
+print(classy.classify(test_set))
+print(classy.classify(test_set2))
