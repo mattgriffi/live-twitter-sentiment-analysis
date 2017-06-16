@@ -3,6 +3,8 @@
 import csv
 import itertools
 import nltk
+import os.path
+import pickle
 import random
 import time
 import unidecode
@@ -15,66 +17,75 @@ from sklearn.svm import LinearSVC, NuSVC
 
 
 class DataSet:
+
+    data_set = None
+
     def __init__(self):
         self.training_set = None
         self.all_features = None
         self.test_set = None
 
+    @staticmethod
+    def get_data():
+        if DataSet.data_set is None:
+            DataSet.data_set = DataSet._load_data()
+        return DataSet.data_set
 
-def load_data():
-    """Loads the data from all corpora. Returns a DataSet object, which contains the training
-    set and the list of all words that appear in the corpora."""
+    @staticmethod
+    def _load_data():
+        """Loads the data from all corpora. Returns a DataSet object, which contains the training
+        set and the list of all words that appear in the corpora."""
 
-    start_time = time.time()
+        start_time = time.time()
 
-    documents = []
+        documents = []
 
-    # Load the short pos/neg movie reviews (approx 10,000)
-    print("Loading movie reviews...")
-    short_pos = unidecode.unidecode(open('positive.txt').read())
-    short_neg = unidecode.unidecode(open('negative.txt').read())
-    for review in short_pos.split('\n'):
-        documents.append((review, 'pos'))
-    for review in short_neg.split('\n'):
-        documents.append((review, 'neg'))
+        # Load the short pos/neg movie reviews (approx 10,000)
+        print("Loading movie reviews...")
+        short_pos = unidecode.unidecode(open('positive.txt').read())
+        short_neg = unidecode.unidecode(open('negative.txt').read())
+        for review in short_pos.split('\n'):
+            documents.append((review, 'pos'))
+        for review in short_neg.split('\n'):
+            documents.append((review, 'neg'))
 
-    # Load the pos/neg tweets from Sander's corpus (approx 900)
-    print("Loading Tweets...")
-    with open('sanders-twitter-0.2/full-corpus.csv', newline='\n') as file:
-        reader = csv.reader(file)
-        for line in reader:
-            tweet = line[4][2:-1]
-            sentiment = line[1][2:5]
-            if sentiment in {'pos', 'neg'}:
-                documents.append((tweet, sentiment))
+        # Load the pos/neg tweets from Sander's corpus (approx 900)
+        print("Loading Tweets...")
+        with open('sanders-twitter-0.2/full-corpus.csv', newline='\n') as file:
+            reader = csv.reader(file)
+            for line in reader:
+                tweet = line[4][2:-1]
+                sentiment = line[1][2:5]
+                if sentiment in {'pos', 'neg'}:
+                    documents.append((tweet, sentiment))
 
-    # Build list of all words that appear in data set
-    print("Building word list...")
-    all_words = [word_tokenize(feature[0]) for feature in documents]
-    all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
-                      if len(word) > 2})
+        # Build list of all words that appear in data set
+        print("Building word list...")
+        all_words = [word_tokenize(feature[0]) for feature in documents]
+        all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
+                         if len(word) > 2})
 
-    # Build list of labeled features
-    print("Building featureset...")
-    labeled_features = [(find_features(feature, all_words), sentiment)
-                        for feature, sentiment in documents]
+        # Build list of labeled features
+        print("Building featureset...")
+        labeled_features = [(DataSet.find_features(feature, all_words), sentiment)
+                            for feature, sentiment in documents]
 
-    # Shuffle the features
-    random.shuffle(labeled_features)
+        # Shuffle the featuresets
+        random.shuffle(labeled_features)
 
-    # Create the DataSet object and store the data in it
-    data = DataSet()
-    data.training_set = labeled_features[:10000]
-    data.all_features = all_words
-    data.test_set = labeled_features[10000:]
+        # Create the DataSet object and store the data in it
+        data = DataSet()
+        data.training_set = labeled_features[:10000]
+        data.all_features = all_words
+        data.test_set = labeled_features[10000:]
 
-    print(f"Data loading complete. Time taken: {time.time()-start_time}\n")
-    return data
+        print(f"Data loading complete. Time taken: {time.time()-start_time}\n")
+        return data
 
-
-def find_features(document, word_features):
-    doc_words = set(word.lower() for word in word_tokenize(document))
-    return {word: (word in doc_words) for word in word_features}
+    @staticmethod
+    def find_features(document, word_features):
+        doc_words = set(word.lower() for word in word_tokenize(document))
+        return {word: (word in doc_words) for word in word_features}
 
 
 def train_classifier(classifier, labeled_features):
@@ -105,9 +116,13 @@ def create_and_train_algorithms(algorithm_list, training_set):
     return training_list
 
 
-data = load_data()
+data = DataSet.get_data()
 
-algorithm_list = [MultinomialNB, BernoulliNB, LogisticRegression, SGDClassifier,
-                  LinearSVC, NuSVC]
-trained_algorithm_list = create_and_train_algorithms(algorithm_list, data.training_set)
-test_algorithm_accuracy(trained_algorithm_list, data.test_set)
+data2 = DataSet.get_data()
+
+data3 = DataSet.get_data()
+
+# algorithm_list = [MultinomialNB, BernoulliNB, LogisticRegression, SGDClassifier,
+#                   LinearSVC, NuSVC]
+# trained_algorithm_list = create_and_train_algorithms(algorithm_list, data.training_set)
+# test_algorithm_accuracy(trained_algorithm_list, data.test_set)
