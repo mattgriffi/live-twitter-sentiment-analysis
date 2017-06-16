@@ -1,7 +1,8 @@
-"""This class handles loading and storing the data set used to train the machine learning algorithms
-and to construct featuresets from Tweets. It uses the Singleton pattern to ensure that the data is
-not loaded more than once since it is a very time-consuming operation. It also uses pickle to save
-the data after it has been loaded and parsed, reducing subsequent loading times."""
+"""This class handles loading and storing the data set used to train the machine learning
+algorithms and to construct featuresets from Tweets. It uses the Singleton pattern to ensure
+that the data is not loaded more than once since it is a very time-consuming operation. It
+also uses pickle to save the data after it has been loaded and parsed, reducing subsequent
+loading times."""
 
 
 import itertools
@@ -37,40 +38,28 @@ class DataSet:
 
     @staticmethod
     def _load_data():
-        """Loads the data from all corpora. Returns a DataSet object, which contains the training
-        set and the list of all words that appear in the corpora."""
-
-        # Load the data set from pickle if it exists
-        pickle_filepath = os.path.join('pickles', 'data.pickle')
-        if os.path.isfile(pickle_filepath):
-            print("Loading data from pickle...")
-            with open(pickle_filepath, 'rb') as pickle_file:
-                data = pickle.load(pickle_file)
-            return data
+        """Loads the data from all corpora. Returns a DataSet object, which contains the
+        training set and the list of all words that appear in the corpora."""
 
         start_time = time.time()
 
+        # Load the data set from pickle if it exists
+        pickle_filepath = os.path.join('pickles', 'data.pickle')
+        data = DataSet._load_data_from_pickle(pickle_filepath)
+        if data is not None:
+            return data
+
+        # documents will be a list of tuples consisting of a body of text and its sentiment
         documents = []
 
         # Load the short pos/neg movie reviews (approx 10,000)
-        print("Loading movie reviews...")
-        short_pos = unidecode(open('positive.txt').read())
-        short_neg = unidecode(open('negative.txt').read())
-        for review in short_pos.split('\n'):
-            documents.append((review, 'pos'))
-        for review in short_neg.split('\n'):
-            documents.append((review, 'neg'))
+        DataSet._load_movie_reviews(documents)
 
         # Build list of all words that appear in data set
-        print("Building word list...")
-        all_words = [word_tokenize(feature[0]) for feature in documents]
-        all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
-                         if len(word) > 2})
+        all_words = DataSet._build_word_list(documents)
 
         # Build list of labeled features
-        print("Building featureset...")
-        labeled_features = [(DataSet.find_features(feature, all_words), sentiment)
-                            for feature, sentiment in documents]
+        labeled_features = DataSet._build_labeled_featuresets(documents, all_words)
 
         # Shuffle the featuresets
         random.shuffle(labeled_features)
@@ -82,20 +71,71 @@ class DataSet:
         data.test_set = labeled_features[10000:]
 
         # Pickle the data set to reduce future loading times
-        if not os.path.isdir('pickles'):
-            os.mkdir('pickles')
-        with open(pickle_filepath, 'wb') as pickle_file:
-            print("Writing pickle file...")
-            pickle.dump(data, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+        DataSet._save_data_to_pickle(pickle_filepath, data)
 
         print(f"Data loading complete. Time taken: {time.time()-start_time}\n")
-
         return data
 
     @staticmethod
+    def _load_movie_reviews(documents):
+        """ Loads reviews from the short movie review corpus. Creates tuples of
+        review-sentiment pairs and appends them to documents."""
+
+        print("Loading movie reviews...")
+        short_pos = unidecode(open('positive.txt').read())
+        short_neg = unidecode(open('negative.txt').read())
+        for review in short_pos.split('\n'):
+            documents.append((review, 'pos'))
+        for review in short_neg.split('\n'):
+            documents.append((review, 'neg'))
+
+    @staticmethod
+    def _build_word_list(documents):
+        """Returns a list of all unique, 3+ char long words in documents."""
+
+        print("Building word list...")
+        all_words = [word_tokenize(feature[0]) for feature in documents]
+        all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
+                         if len(word) > 2})
+        return all_words
+
+    @staticmethod
+    def _build_labeled_featuresets(documents, word_list):
+        """Returns a list of labeled featuresets. Each labeled featureset is a tuple of a dict
+        (the featureset) and a sentiment (the label). The dict contains word-bool pairs that
+        indicate whether the given word from word_list appears in the corresponding
+        document."""
+
+        print("Building featureset...")
+        return [(DataSet.find_features(feature, word_list), sentiment)
+                for feature, sentiment in documents]
+
+    @staticmethod
+    def _load_data_from_pickle(pickle_filepath):
+        """Attempts to load the data set from a saved pickle file. If the pickle file does not
+        exist, returns None."""
+
+        data = None
+        if os.path.isfile(pickle_filepath):
+            print("Loading data from pickle...")
+            with open(pickle_filepath, 'rb') as pickle_file:
+                data = pickle.load(pickle_file)
+        return data
+
+    @staticmethod
+    def _save_data_to_pickle(pickle_filepath, data):
+        """Saves the given data object to a pickle file at the given filepath."""
+
+        print("Writing pickle file...")
+        if not os.path.isdir('pickles'):
+            os.mkdir('pickles')
+        with open(pickle_filepath, 'wb') as pickle_file:
+            pickle.dump(data, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
     def find_features(document, word_features):
-        """Returns a featureset of word-bool pairs. bool will be True if word from word_features
-        exists in document, else False."""
+        """Returns a featureset of word-bool pairs. bool will be True if word from
+        word_features exists in document, else False."""
 
         doc_words = set(word.lower() for word in word_tokenize(document))
         return {word: (word in doc_words) for word in word_features}
