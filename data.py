@@ -14,6 +14,7 @@ import random
 import time
 
 from nltk import word_tokenize
+from nltk import pos_tag
 from unidecode import unidecode
 
 logging.basicConfig(level=logging.DEBUG,
@@ -60,10 +61,16 @@ class DataSet:
         DataSet._load_movie_reviews(documents)
 
         # Build list of all words that appear in data set
-        all_words = DataSet._build_word_list(documents)
+        word_list = DataSet._build_word_list(documents)
+
+        # Remove useless words from word list by part of speech
+        # For a list of nltk parts of speech, run nltk.help.upenn_tagset()
+        allowed_pos = {'FW', 'JJ', 'JJR', 'JJS', 'MD', 'RB', 'RBR', 'RBS', 'UH',
+                       'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
+        word_list = DataSet._remove_words_by_pos(word_list, allowed_pos)
 
         # Build list of labeled features
-        labeled_features = DataSet._build_labeled_featuresets(documents, all_words)
+        labeled_features = DataSet._build_labeled_featuresets(documents, word_list)
 
         # Shuffle the featuresets
         random.shuffle(labeled_features)
@@ -71,7 +78,7 @@ class DataSet:
         # Create the DataSet object and store the data in it
         data = DataSet()
         data.training_set = labeled_features[:10000]
-        data.all_features = all_words
+        data.all_features = word_list
         data.test_set = labeled_features[10000:]
 
         # Pickle the data set to reduce future loading times
@@ -102,6 +109,14 @@ class DataSet:
         all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
                          if len(word) > 2})
         return all_words
+
+    @staticmethod
+    def _remove_words_by_pos(word_list, allowed_pos):
+        """Returns a new list of words from word_list whose part of speech is in
+        allowed_pos."""
+
+        tagged_words = pos_tag(word_list)
+        return [word[0] for word in tagged_words if word[1] in allowed_pos]
 
     @staticmethod
     def _build_labeled_featuresets(documents, word_list):
