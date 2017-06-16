@@ -6,6 +6,7 @@ loading times."""
 
 
 import itertools
+import logging
 import os
 import os.path
 import pickle
@@ -14,6 +15,9 @@ import time
 
 from nltk import word_tokenize
 from unidecode import unidecode
+
+logging.basicConfig(level=logging.DEBUG,
+                    format=' %(asctime)s - %(levelname)s - %(funcName)-30s - %(message)s')
 
 
 class DataSet:
@@ -31,9 +35,8 @@ class DataSet:
         been created."""
 
         if DataSet.data_set is None:
-            print("Loading data set from scratch...")
             DataSet.data_set = DataSet._load_data()
-        print("Returning cached data set.")
+        logging.info("Returning cached data set.")
         return DataSet.data_set
 
     @staticmethod
@@ -48,6 +51,7 @@ class DataSet:
         data = DataSet._load_data_from_pickle(pickle_filepath)
         if data is not None:
             return data
+        logging.info("Loading data set from scratch...")
 
         # documents will be a list of tuples consisting of a body of text and its sentiment
         documents = []
@@ -73,7 +77,7 @@ class DataSet:
         # Pickle the data set to reduce future loading times
         DataSet._save_data_to_pickle(pickle_filepath, data)
 
-        print(f"Data loading complete. Time taken: {time.time()-start_time}\n")
+        logging.info(f"Data loading complete. Time taken: {time.time()-start_time}\n")
         return data
 
     @staticmethod
@@ -81,7 +85,7 @@ class DataSet:
         """ Loads reviews from the short movie review corpus. Creates tuples of
         review-sentiment pairs and appends them to documents."""
 
-        print("Loading movie reviews...")
+        logging.info("Loading movie reviews...")
         short_pos = unidecode(open('positive.txt').read())
         short_neg = unidecode(open('negative.txt').read())
         for review in short_pos.split('\n'):
@@ -93,7 +97,7 @@ class DataSet:
     def _build_word_list(documents):
         """Returns a list of all unique, 3+ char long words in documents."""
 
-        print("Building word list...")
+        logging.info("Building word list...")
         all_words = [word_tokenize(feature[0]) for feature in documents]
         all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
                          if len(word) > 2})
@@ -106,7 +110,7 @@ class DataSet:
         indicate whether the given word from word_list appears in the corresponding
         document."""
 
-        print("Building featureset...")
+        logging.info("Building featureset...")
         return [(DataSet.find_features(feature, word_list), sentiment)
                 for feature, sentiment in documents]
 
@@ -117,7 +121,7 @@ class DataSet:
 
         data = None
         if os.path.isfile(pickle_filepath):
-            print("Loading data from pickle...")
+            logging.info("Loading data from pickle...")
             with open(pickle_filepath, 'rb') as pickle_file:
                 data = pickle.load(pickle_file)
         return data
@@ -126,7 +130,7 @@ class DataSet:
     def _save_data_to_pickle(pickle_filepath, data):
         """Saves the given data object to a pickle file at the given filepath."""
 
-        print("Writing pickle file...")
+        logging.info("Writing pickle file...")
         if not os.path.isdir('pickles'):
             os.mkdir('pickles')
         with open(pickle_filepath, 'wb') as pickle_file:
