@@ -3,6 +3,7 @@
 import csv
 import itertools
 import nltk
+import os
 import os.path
 import pickle
 import random
@@ -28,13 +29,23 @@ class DataSet:
     @staticmethod
     def get_data():
         if DataSet.data_set is None:
+            print("Loading data set from scratch...")
             DataSet.data_set = DataSet._load_data()
+        print("Returning cached data set.")
         return DataSet.data_set
 
     @staticmethod
     def _load_data():
         """Loads the data from all corpora. Returns a DataSet object, which contains the training
         set and the list of all words that appear in the corpora."""
+
+        # Load the data set from pickle if it exists
+        pickle_filepath = os.path.join('pickles', 'data.pickle')
+        if os.path.isfile(pickle_filepath):
+            print("Loading data from pickle...")
+            with open(pickle_filepath, 'rb') as pickle_file:
+                data = pickle.load(pickle_file)
+            return data
 
         start_time = time.time()
 
@@ -78,6 +89,13 @@ class DataSet:
         data.training_set = labeled_features[:10000]
         data.all_features = all_words
         data.test_set = labeled_features[10000:]
+
+        # Pickle the data set to reduce future loading times
+        if not os.path.isdir('pickles'):
+            os.mkdir('pickles')
+        with open(pickle_filepath, 'wb') as pickle_file:
+            print("Writing pickle file...")
+            pickle.dump(data, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 
         print(f"Data loading complete. Time taken: {time.time()-start_time}\n")
         return data
