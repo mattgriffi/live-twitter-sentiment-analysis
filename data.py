@@ -10,9 +10,9 @@ import os.path
 import pickle
 import random
 import time
-import unidecode
 
 from nltk import word_tokenize
+from unidecode import unidecode
 
 
 class DataSet:
@@ -54,8 +54,8 @@ class DataSet:
 
         # Load the short pos/neg movie reviews (approx 10,000)
         print("Loading movie reviews...")
-        short_pos = unidecode.unidecode(open('positive.txt').read())
-        short_neg = unidecode.unidecode(open('negative.txt').read())
+        short_pos = unidecode(open('positive.txt').read())
+        short_neg = unidecode(open('negative.txt').read())
         for review in short_pos.split('\n'):
             documents.append((review, 'pos'))
         for review in short_neg.split('\n'):
