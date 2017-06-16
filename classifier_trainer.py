@@ -60,16 +60,6 @@ class DataSet:
         for review in short_neg.split('\n'):
             documents.append((review, 'neg'))
 
-        # Load the pos/neg tweets from Sander's corpus (approx 900)
-        print("Loading Tweets...")
-        with open('sanders-twitter-0.2/full-corpus.csv', newline='\n') as file:
-            reader = csv.reader(file)
-            for line in reader:
-                tweet = line[4][2:-1]
-                sentiment = line[1][2:5]
-                if sentiment in {'pos', 'neg'}:
-                    documents.append((tweet, sentiment))
-
         # Build list of all words that appear in data set
         print("Building word list...")
         all_words = [word_tokenize(feature[0]) for feature in documents]
