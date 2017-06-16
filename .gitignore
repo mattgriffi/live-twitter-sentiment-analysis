@@ -105,3 +105,9 @@ ENV/
 .vscode/extensions.json
 
 .idea/*
+
+sanders-twitter-0.2/*
+sanders-twitter-0.2/rawdata/*
+sanders-twitter-0.2/rawdata/*.json
+
+.gitignore
