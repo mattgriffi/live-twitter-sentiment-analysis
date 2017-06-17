@@ -105,7 +105,7 @@ class DataSet:
         """Returns a list of all unique, 3+ char long words in documents."""
 
         logging.info("Building word list...")
-        all_words = [word_tokenize(feature[0]) for feature in documents]
+        all_words = [word_tokenize(document) for document, _ in documents]
         all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
                          if len(word) > 2})
         return all_words
@@ -126,8 +126,16 @@ class DataSet:
         document."""
 
         logging.info("Building featureset...")
-        return [(DataSet.find_features(feature, word_list), sentiment)
-                for feature, sentiment in documents]
+        return [(DataSet.find_features(document, word_list), sentiment)
+                for document, sentiment in documents]
+
+    @staticmethod
+    def find_features(document, word_features):
+        """Returns a featureset of word-bool pairs. bool will be True if word from
+        word_features exists in document, else False."""
+
+        doc_words = set(word.lower() for word in word_tokenize(document))
+        return {word: (word in doc_words) for word in word_features}
 
     @staticmethod
     def _load_data_from_pickle(pickle_filepath):
@@ -150,11 +158,3 @@ class DataSet:
             os.mkdir('pickles')
         with open(pickle_filepath, 'wb') as pickle_file:
             pickle.dump(data, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
-
-    @staticmethod
-    def find_features(document, word_features):
-        """Returns a featureset of word-bool pairs. bool will be True if word from
-        word_features exists in document, else False."""
-
-        doc_words = set(word.lower() for word in word_tokenize(document))
-        return {word: (word in doc_words) for word in word_features}
