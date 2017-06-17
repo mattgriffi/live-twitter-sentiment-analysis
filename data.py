@@ -85,13 +85,7 @@ class DataSet:
         training set and the list of all words that appear in the corpora."""
 
         start_time = time.time()
-
-        # Load the data set from pickle if it exists
-        pickle_filepath = os.path.join('pickles', 'data.pickle')
-        data = DataSet._load_data_from_pickle(pickle_filepath)
-        if data is not None:
-            return data
-        logging.info("Loading data set from scratch...")
+        logging.info("Loading data set...")
 
         # documents will be a list of tuples consisting of a body of text and its sentiment
         documents = []
@@ -115,7 +109,6 @@ class DataSet:
         DataSet.feature_list = word_list
 
         # Pickle the data set to reduce future loading times
-        DataSet._save_data_to_pickle(pickle_filepath, data)
         DataSet._save_data_to_pickle(os.path.join('pickles', 'features.pickle'), word_list)
 
         logging.info(f"Data loading complete. Time taken: {time.time()-start_time}\n")
