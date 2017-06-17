@@ -24,6 +24,23 @@ class ClassifierTrainer:
         """Returns a list of trained classifiers. classifier_list is a list of machine learning
         classifier constructor functions."""
 
+        # Get NamedClassifiers, needed for building file paths
+        named_classifiers = ClassifierTrainer._get_named_classifiers(classifier_list)
+
+        # Check if trained classifier pickles exist and load them
+
+        # Wrap NamedClassifiers
+        ClassifierTrainer._wrap_named_classifiers(named_classifiers)
+
+        # Train classifiers
+        data = DataSet.get_data()
+        ClassifierTrainer._train_classifiers(named_classifiers, data.training_set)
+
+        # Pickle the trained classifiers to reduce future load times
+
+        # Return list of trained classifiers
+        return [classifier.classifier for classifier in named_classifiers]
+
     @staticmethod
     def _get_named_classifiers(classifier_list):
         """Returns a list of NamedClassifiers."""
@@ -35,10 +52,10 @@ class ClassifierTrainer:
         """Takes a list of NamedClassifiers and wraps each of them with SklearnClassifier."""
 
         for named_classifier in named_classifier_list:
-            named_classifier.classifier = SklearnClassifier(named_classifier.classifier)
+            named_classifier.classifier = SklearnClassifier(named_classifier.classifier())
 
     @staticmethod
-    def _create_and_train_algorithms(wrapped_named_classifier_list, training_set):
+    def _train_classifiers(wrapped_named_classifier_list, training_set):
         """Takes a list of SklearnClassifier-wrapped NamedClassifiers and trains each of
         them."""
 
@@ -46,7 +63,7 @@ class ClassifierTrainer:
             logging.info(f"Training {named_classifier.name}...")
             start = time.time()
             named_classifier.classifier.train(training_set)
-            logging.info(f"Training complete. Time taken: {time.time()-start}\n")
+            logging.info(f"Training complete. Time taken: {time.time()-start}")
 
 
 class NamedClassifier:
@@ -54,7 +71,7 @@ class NamedClassifier:
 
     def __init__(self, classifier):
         self.classifier = classifier
-        self.name = classifier.__class__.__name__
+        self.name = classifier.__name__
 
 
 def test_algorithm_accuracy(algorithm_list, testing_set):
@@ -74,7 +91,7 @@ data2 = DataSet.get_data()
 
 data3 = DataSet.get_data()
 
-# algorithm_list = [MultinomialNB, BernoulliNB, LogisticRegression, SGDClassifier,
-#                   LinearSVC, NuSVC]
-# trained_algorithm_list = create_and_train_algorithms(algorithm_list, data.training_set)
-# test_algorithm_accuracy(trained_algorithm_list, data.test_set)
+algorithm_list = [MultinomialNB, BernoulliNB, LogisticRegression, SGDClassifier,
+                  LinearSVC, NuSVC]
+trained_algorithm_list = ClassifierTrainer.get_trained_classifiers(algorithm_list)
+test_algorithm_accuracy(trained_algorithm_list, data.test_set)
