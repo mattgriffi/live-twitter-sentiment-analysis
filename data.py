@@ -17,9 +17,6 @@ from nltk import word_tokenize
 from nltk import pos_tag
 from unidecode import unidecode
 
-logging.basicConfig(level=logging.DEBUG,
-                    format=' %(asctime)s - %(levelname)s - %(funcName)-30s - %(message)s')
-
 
 class DataSet:
 
@@ -89,7 +86,7 @@ class DataSet:
 
     @staticmethod
     def _load_movie_reviews(documents):
-        """ Loads reviews from the short movie review corpus. Creates tuples of
+        """Loads reviews from the short movie review corpus. Creates tuples of
         review-sentiment pairs and appends them to documents."""
 
         logging.info("Loading movie reviews...")
