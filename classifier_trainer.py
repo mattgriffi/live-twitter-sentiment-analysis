@@ -1,4 +1,8 @@
-"""This class will train the machine learning classifiers with a data set."""
+"""This class instantiates and trains the machine learning classifiers. It will attempt to load
+the classifiers from pickle files if possible, and will create and train any that cannot
+be loaded. The newly created classifiers will be saved to pickles to reduce future loading
+times. It also uses the Singleton pattern to make the list of trained classifiers available
+without the risk of re-loading or re-training them."""
 
 import logging
 import nltk
@@ -27,6 +31,11 @@ class ClassifierTrainer:
         """Returns a list of trained classifiers. classifier_list is a list of machine learning
         classifier constructor functions."""
 
+        # If trained classifiers are already ready to go, just return them
+        if ClassifierTrainer.trained_classifiers:
+            logging.info("Returning cached classifiers...")
+            return ClassifierTrainer._strip_names(ClassifierTrainer.trained_classifiers)
+
         # Get NamedClassifiers, needed for building file paths
         named_classifiers = ClassifierTrainer._get_named_classifiers(classifier_list)
 
@@ -48,9 +57,17 @@ class ClassifierTrainer:
             # Pickle the trained classifiers to reduce future load times
             ClassifierTrainer._save_classifiers_to_pickle(untrained_classifiers)
 
+        # Save the trained classifiers for repeated access
+        ClassifierTrainer.trained_classifiers = trained_classifiers + untrained_classifiers
+
         # Return list of trained classifiers
-        return [classifier.classifier for classifier
-                in trained_classifiers + untrained_classifiers]
+        return ClassifierTrainer._strip_names(ClassifierTrainer.trained_classifiers)
+
+    @staticmethod
+    def _strip_names(named_classifier_list):
+        """Returns a list of classifiers (not NamedClassifiers)."""
+
+        return [classifier.classifier for classifier in named_classifier_list]
 
     @staticmethod
     def _get_named_classifiers(classifier_list):
@@ -140,4 +157,5 @@ data3 = DataSet.get_data()
 algorithm_list = [MultinomialNB, BernoulliNB, LogisticRegression, SGDClassifier,
                   LinearSVC, NuSVC]
 trained_algorithm_list = ClassifierTrainer.get_trained_classifiers(algorithm_list)
-test_algorithm_accuracy(trained_algorithm_list, data.test_set)
+trained_algorithm_list2 = ClassifierTrainer.get_trained_classifiers(algorithm_list)
+test_algorithm_accuracy(trained_algorithm_list2, data.test_set)
