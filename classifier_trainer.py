@@ -43,7 +43,7 @@ class ClassifierTrainer:
 
         if untrained_classifiers:
 
-            # Wrap NamedClassifiers
+            # Wrap NamedClassifiers with nltk's SklearnClassifier
             ClassifierTrainer._wrap_named_classifiers(untrained_classifiers)
 
             # Train classifiers
