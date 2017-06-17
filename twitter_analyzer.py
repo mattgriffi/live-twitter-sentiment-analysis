@@ -37,12 +37,3 @@ classifier = VotingClassifier()
 stream_listener = KeywordStreamListener(classifier)
 stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
 stream.filter(track=['Microsoft'])
-
-
-# public_tweets = api.home_timeline()
-# for tweet in public_tweets:
-#     print(tweet.text)
-#     classification = classifier.classify(DataSet.find_features(tweet.text, data.all_features))
-#     if classifier.get_most_recent_confidence() < 1.0:
-#         classification = 'unsure'
-#     print(f"Classification: {classification}\n")
