@@ -7,15 +7,14 @@ from voting_classifier import VotingClassifier
 
 class KeywordStreamListener(tweepy.StreamListener):
 
-    def __init__(self, classifier, data):
+    def __init__(self, classifier):
         super().__init__()
         self.classifier = classifier
-        self.data = data
 
     def on_status(self, status):
         text = status.text.strip()
         classification = self.classifier.classify(
-            DataSet.find_features(text, self.data.all_features))
+            DataSet.find_features(text, DataSet.get_feature_list()))
         if self.classifier.get_most_recent_confidence() < 0.8:
             classification = 'unsure'
         print(status.text.strip())
@@ -33,10 +32,9 @@ auth.set_access_token(keys[2], keys[3])
 
 api = tweepy.API(auth)
 
-data = DataSet.get_data()
 classifier = VotingClassifier()
 
-stream_listener = KeywordStreamListener(classifier, data)
+stream_listener = KeywordStreamListener(classifier)
 stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
 stream.filter(track=['Microsoft'])
 

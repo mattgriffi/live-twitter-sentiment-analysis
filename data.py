@@ -21,11 +21,53 @@ from unidecode import unidecode
 class DataSet:
 
     data_set = None
+    feature_list = None
 
     def __init__(self):
         self.training_set = None
         self.all_features = None
-        self.test_set = None
+
+    @staticmethod
+    def get_feature_list():
+        """Returns the feature list used for constructing featuresets from documents. If the
+        list is not loaded, it will load the list."""
+
+        if DataSet.feature_list is None:
+            DataSet._load_feature_list()
+        return DataSet.feature_list
+
+    @staticmethod
+    def _load_feature_list():
+        """This method will load the raw corpora data to construct a word list used for
+        building featuresets. It will not build full featuresets from the corpora, and so is
+        more memory efficient for classification with pre-trained classifiers."""
+
+        # Try to load the feature list from pickle
+        pickle_filepath = os.path.join('pickles', 'features.pickle')
+        DataSet.feature_list = DataSet._load_data_from_pickle(pickle_filepath)
+
+        if DataSet.feature_list is None:
+
+            # documents will be a list of tuples consisting of text and its sentiment
+            documents = []
+
+            # Load the short pos/neg movie reviews (approx 10,000)
+            DataSet._load_movie_reviews(documents)
+
+            # Build list of all words that appear in data set
+            DataSet.feature_list = DataSet._build_feature_list(documents)
+
+            # Save feature list to pickle for future use
+            DataSet._save_data_to_pickle(
+                os.path.join(pickle_filepath), DataSet.feature_list)
+
+    @staticmethod
+    def unload_data():
+        """This method will reset DataSet's internal reference to the loaded data set.
+        If no other references to a DataSet object exist, then it will be garbage collected.
+        Call this to reduce memory usage after the full data set is no longer needed."""
+
+        DataSet.data_set = None
 
     @staticmethod
     def get_data():
@@ -58,13 +100,7 @@ class DataSet:
         DataSet._load_movie_reviews(documents)
 
         # Build list of all words that appear in data set
-        word_list = DataSet._build_word_list(documents)
-
-        # Remove useless words from word list by part of speech
-        # For a list of nltk parts of speech, run nltk.help.upenn_tagset()
-        allowed_pos = {'FW', 'JJ', 'JJR', 'JJS', 'MD', 'RB', 'RBR', 'RBS', 'UH',
-                       'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
-        word_list = DataSet._remove_words_by_pos(word_list, allowed_pos)
+        word_list = DataSet._build_feature_list(documents)
 
         # Build list of labeled features
         labeled_features = DataSet._build_labeled_featuresets(documents, word_list)
@@ -74,12 +110,13 @@ class DataSet:
 
         # Create the DataSet object and store the data in it
         data = DataSet()
-        data.training_set = labeled_features[:-100]
+        data.training_set = labeled_features
         data.all_features = word_list
-        data.test_set = labeled_features[-100:]
+        DataSet.feature_list = word_list
 
         # Pickle the data set to reduce future loading times
         DataSet._save_data_to_pickle(pickle_filepath, data)
+        DataSet._save_data_to_pickle(os.path.join('pickles', 'features.pickle'), word_list)
 
         logging.info(f"Data loading complete. Time taken: {time.time()-start_time}\n")
         return data
@@ -98,14 +135,21 @@ class DataSet:
             documents.append((review, 'neg'))
 
     @staticmethod
-    def _build_word_list(documents):
-        """Returns a list of all unique, 3+ char long words in documents."""
+    def _build_feature_list(documents):
+        """Returns a list of all unique, 3+ char long words that are of a useful part of speech
+        in documents."""
 
         logging.info("Building word list...")
         all_words = [word_tokenize(document) for document, _ in documents]
         all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
                          if len(word) > 2})
-        return all_words
+
+        # Remove useless words from word list by part of speech
+        # For a list of nltk parts of speech, run nltk.help.upenn_tagset()
+        allowed_pos = {'FW', 'JJ', 'JJR', 'JJS', 'MD', 'RB', 'RBR', 'RBS', 'UH',
+                       'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'}
+        tagged_words = pos_tag(all_words)
+        return [word[0] for word in tagged_words if word[1] in allowed_pos]
 
     @staticmethod
     def _remove_words_by_pos(word_list, allowed_pos):

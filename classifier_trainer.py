@@ -49,6 +49,7 @@ class ClassifierTrainer:
             # Train classifiers
             data = DataSet.get_data()
             ClassifierTrainer._train_classifiers(untrained_classifiers, data.training_set)
+            DataSet.unload_data()
 
             # Pickle the trained classifiers to reduce future load times
             ClassifierTrainer._save_classifiers_to_pickle(untrained_classifiers)
