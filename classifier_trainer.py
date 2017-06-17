@@ -2,6 +2,9 @@
 
 import logging
 import nltk
+import os
+import os.path
+import pickle
 import time
 
 from nltk.classify.scikitlearn import SklearnClassifier
@@ -27,19 +30,27 @@ class ClassifierTrainer:
         # Get NamedClassifiers, needed for building file paths
         named_classifiers = ClassifierTrainer._get_named_classifiers(classifier_list)
 
-        # Check if trained classifier pickles exist and load them
+        # Check if trained classifier pickles exist and load them. Will return a list of
+        # classifiers that were successfully loaded, and a list of classifiers that could not
+        # be loaded.
+        trained_classifiers, untrained_classifiers = \
+            ClassifierTrainer._load_classifier_pickles(named_classifiers)
 
-        # Wrap NamedClassifiers
-        ClassifierTrainer._wrap_named_classifiers(named_classifiers)
+        if untrained_classifiers:
 
-        # Train classifiers
-        data = DataSet.get_data()
-        ClassifierTrainer._train_classifiers(named_classifiers, data.training_set)
+            # Wrap NamedClassifiers
+            ClassifierTrainer._wrap_named_classifiers(untrained_classifiers)
 
-        # Pickle the trained classifiers to reduce future load times
+            # Train classifiers
+            data = DataSet.get_data()
+            ClassifierTrainer._train_classifiers(untrained_classifiers, data.training_set)
+
+            # Pickle the trained classifiers to reduce future load times
+            ClassifierTrainer._save_classifiers_to_pickle(untrained_classifiers)
 
         # Return list of trained classifiers
-        return [classifier.classifier for classifier in named_classifiers]
+        return [classifier.classifier for classifier
+                in trained_classifiers + untrained_classifiers]
 
     @staticmethod
     def _get_named_classifiers(classifier_list):
@@ -64,6 +75,41 @@ class ClassifierTrainer:
             start = time.time()
             named_classifier.classifier.train(training_set)
             logging.info(f"Training complete. Time taken: {time.time()-start}")
+
+    @staticmethod
+    def _load_classifier_pickles(named_classifier_list):
+        """Attempts to load pre-trained classifiers from pickles. Returns two lists of
+        NamedClassifiers. The first is a list of classifiers that were successfully loaded from
+        pickle and are ready to go. The second is a list of classifiers that could not be
+        loaded and need to be loaded manually."""
+
+        pickle_folder = 'pickles'
+        unloaded_classifiers = []
+        loaded_classifiers = []
+        for named_classifier in named_classifier_list:
+            pickle_filepath = os.path.join(pickle_folder, named_classifier.name + '.pickle')
+            if os.path.isfile(pickle_filepath):
+                logging.info(f"Loading {named_classifier.name} from pickle...")
+                with open(pickle_filepath, 'rb') as pickle_file:
+                    named_classifier.classifier = pickle.load(pickle_file)
+                loaded_classifiers.append(named_classifier)
+            else:
+                unloaded_classifiers.append(named_classifier)
+
+        return loaded_classifiers, unloaded_classifiers
+
+    @staticmethod
+    def _save_classifiers_to_pickle(trained_classifiers):
+        """Saves the pre-trained classifiers to pickle files."""
+
+        if not os.path.isdir('pickles'):
+            os.mkdir('pickles')
+        for trained_classifier in trained_classifiers:
+            pickle_filepath = os.path.join('pickles', trained_classifier.name + '.pickle')
+            with open(pickle_filepath, 'wb') as pickle_file:
+                logging.info(f"Writing {trained_classifier.name} to pickle file...")
+                pickle.dump(trained_classifier.classifier, pickle_file,
+                            protocol=pickle.HIGHEST_PROTOCOL)
 
 
 class NamedClassifier:
