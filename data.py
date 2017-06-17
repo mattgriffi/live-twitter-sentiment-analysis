@@ -74,9 +74,9 @@ class DataSet:
 
         # Create the DataSet object and store the data in it
         data = DataSet()
-        data.training_set = labeled_features[:10000]
+        data.training_set = labeled_features[:-100]
         data.all_features = word_list
-        data.test_set = labeled_features[10000:]
+        data.test_set = labeled_features[-100:]
 
         # Pickle the data set to reduce future loading times
         DataSet._save_data_to_pickle(pickle_filepath, data)
