@@ -5,16 +5,12 @@ times. It also uses the Singleton pattern to make the list of trained classifier
 without the risk of re-loading or re-training them."""
 
 import logging
-import nltk
 import os
 import os.path
 import pickle
 import time
 
 from nltk.classify.scikitlearn import SklearnClassifier
-from sklearn.naive_bayes import MultinomialNB, BernoulliNB
-from sklearn.linear_model import LogisticRegression, SGDClassifier
-from sklearn.svm import LinearSVC, NuSVC
 
 from data import DataSet
 
@@ -135,27 +131,3 @@ class NamedClassifier:
     def __init__(self, classifier):
         self.classifier = classifier
         self.name = classifier.__name__
-
-
-def test_algorithm_accuracy(algorithm_list, testing_set):
-    """Tests and prints the accuracy of each algorithm in the list."""
-    for algorithm in algorithm_list:
-        print(f"\n{algorithm._clf.__class__.__name__:<20} "
-              f"{nltk.classify.accuracy(algorithm, testing_set)}")
-
-        for i in range(10):
-            print(f"Test {i}: {algorithm._clf.__class__.__name__} -> "
-                  f"{algorithm.classify(testing_set[i][0])} : {testing_set[i][1]}")
-
-
-data = DataSet.get_data()
-
-data2 = DataSet.get_data()
-
-data3 = DataSet.get_data()
-
-algorithm_list = [MultinomialNB, BernoulliNB, LogisticRegression, SGDClassifier,
-                  LinearSVC, NuSVC]
-trained_algorithm_list = ClassifierTrainer.get_trained_classifiers(algorithm_list)
-trained_algorithm_list2 = ClassifierTrainer.get_trained_classifiers(algorithm_list)
-test_algorithm_accuracy(trained_algorithm_list2, data.test_set)
