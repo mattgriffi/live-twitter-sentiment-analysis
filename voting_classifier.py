@@ -30,7 +30,7 @@ class VotingClassifier(ClassifierI):
         for classifier in self.classifiers:
             results.append(classifier.classify(featureset))
         mode = statistics.mode(results)
-        self.confidence = mode / len(results)
+        self.confidence = results.count(mode) / len(results)
         return mode
 
     def get_most_recent_confidence(self):
