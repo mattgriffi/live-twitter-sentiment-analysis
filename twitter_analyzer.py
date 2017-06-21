@@ -1,4 +1,4 @@
-
+import matplotlib.pyplot as plt
 import tweepy
 
 from data import DataSet
@@ -37,4 +37,11 @@ classifier = VotingClassifier()
 
 stream_listener = KeywordStreamListener(classifier)
 stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
-stream.filter(track=['Apple'])
+
+
+stream.filter(track=['Apple'], async=True)
+
+plt.figure(1)
+plt.plot()
+plt.show()
+stream.disconnect()
