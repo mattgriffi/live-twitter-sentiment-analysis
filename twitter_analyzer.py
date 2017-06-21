@@ -16,16 +16,18 @@ class KeywordStreamListener(tweepy.StreamListener):
         self.queue = queue
 
     def on_status(self, status):
-        text = status.text.strip()
-        # if not text.startswith('RT @'):
-        # print('Tweet received!')
-        classification = self.classifier.classify(
-            DataSet.find_features(text, DataSet.get_feature_list()))
-        if self.classifier.get_most_recent_confidence() < 1.0:
-            classification = 'unsure'
-        self.queue.put((status.text.strip(), classification))
-            # print(status.text.strip())
-            # print(f"Classification: {classification}\n")
+        try:
+            # Try to get the full text from extended tweets
+            text = status.extended_tweet['full_text'].strip()
+        except AttributeError:
+            # Fall back to normal text field for non-extended tweets
+            text = status.text.strip()
+        if not text.startswith('RT @'):
+            classification = self.classifier.classify(
+                DataSet.find_features(text, DataSet.get_feature_list()))
+            if self.classifier.get_most_recent_confidence() < 1.0:
+                classification = 'unsure'
+            self.queue.put((status.text.strip(), classification))
 
     def on_error(self, code):
         print(f"ERROR: {code}")
