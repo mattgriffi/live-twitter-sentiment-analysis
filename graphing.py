@@ -16,7 +16,7 @@ MAX_TWEETS = 200
 MAX_AVERAGES = 100
 
 
-def graph(queue):
+def graph(queue, keyword):
     """Creates matplotlib figure and plots, then loops and continuously updates them with the
     data pulled from the Twitter stream. This function must be called in a process separate
     from the Twitter stream."""
@@ -30,7 +30,7 @@ def graph(queue):
     while plt.fignum_exists(1):
         _get_tweets(queue, recent_tweets)
         _get_average_sentiment(recent_tweets, average_sentiments)
-        _update_sentiment_graph(sentiment_graph, average_sentiments)
+        _update_sentiment_graph(sentiment_graph, average_sentiments, keyword)
         _update_word_cloud(word_cloud, word_cloud_generator, recent_tweets)
 
 
@@ -65,7 +65,7 @@ def timer(interval):
     return decorator
 
 
-def _init_graphs():
+def _init_graphs(keyword):
     """Creates the figure and subplots for the sentiment graph and word cloud. Enables
     interactive mode. Returns the two subplots."""
 
@@ -97,12 +97,14 @@ def _get_average_sentiment(recent_tweets, recent_averages):
         recent_averages.append(average)
 
 
-def _update_sentiment_graph(sentiment_graph, averages):
+def _update_sentiment_graph(sentiment_graph, averages, keyword):
     """Redraws sentiment_graph with data from averages."""
 
     sentiment_graph.clear()
     sentiment_graph.plot([average for average in averages])
     sentiment_graph.axis([0, 100, 0, 1])
+    sentiment_graph.set_title(f'Sentiment for keyword: {keyword}')
+    sentiment_graph.set_ylabel('Sentiment')
 
     plt.draw()
     plt.pause(0.05)

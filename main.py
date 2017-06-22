@@ -18,7 +18,7 @@ def main():
 
     streaming_process = multiprocessing.Process(target=start_tweepy,
                                                 args=(KEYWORD, classifier, queue))
-    graphing_process = multiprocessing.Process(target=graph, args=(queue,))
+    graphing_process = multiprocessing.Process(target=graph, args=(queue, KEYWORD))
 
     streaming_process.start()
     graphing_process.start()
