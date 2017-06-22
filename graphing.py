@@ -1,4 +1,5 @@
 import logging
+import matplotlib
 import matplotlib.pyplot as plt
 import random
 import time
@@ -67,6 +68,7 @@ def _init_graphs():
     interactive mode. Returns the two subplots."""
 
     logging.debug("Loading matplotlib graphs")
+    matplotlib.rcParams['toolbar'] = 'None'
     fig = plt.figure(figsize=(12, 10))
     top = fig.add_subplot(211)
     bot = fig.add_subplot(212)
