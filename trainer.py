@@ -14,9 +14,6 @@ from nltk.classify.scikitlearn import SklearnClassifier
 
 from data import DataSet
 
-logging.basicConfig(level=logging.DEBUG,
-                    format=' %(asctime)s - %(levelname)s - %(funcName)-30s - %(message)s')
-
 
 class ClassifierTrainer:
 
@@ -29,7 +26,7 @@ class ClassifierTrainer:
 
         # If trained classifiers are already ready to go, just return them
         if ClassifierTrainer.trained_classifiers:
-            logging.info("Returning cached classifiers...")
+            logging.debug("Returning cached classifiers")
             return ClassifierTrainer._strip_names(ClassifierTrainer.trained_classifiers)
 
         # Get NamedClassifiers, needed for building file paths
@@ -85,10 +82,10 @@ class ClassifierTrainer:
         them."""
 
         for named_classifier in wrapped_named_classifier_list:
-            logging.info(f"Training {named_classifier.name}...")
+            logging.debug(f"Training {named_classifier.name}")
             start = time.time()
             named_classifier.classifier.train(training_set)
-            logging.info(f"Training complete. Time taken: {time.time()-start}")
+            logging.debug(f"Training complete. Time taken: {time.time()-start}")
 
     @staticmethod
     def _load_classifier_pickles(named_classifier_list):
@@ -103,7 +100,7 @@ class ClassifierTrainer:
         for named_classifier in named_classifier_list:
             pickle_filepath = os.path.join(pickle_folder, named_classifier.name + '.pickle')
             if os.path.isfile(pickle_filepath):
-                logging.info(f"Loading {named_classifier.name} from pickle...")
+                logging.debug(f"Loading {named_classifier.name} from pickle")
                 with open(pickle_filepath, 'rb') as pickle_file:
                     named_classifier.classifier = pickle.load(pickle_file)
                 loaded_classifiers.append(named_classifier)
@@ -121,7 +118,7 @@ class ClassifierTrainer:
         for trained_classifier in trained_classifiers:
             pickle_filepath = os.path.join('pickles', trained_classifier.name + '.pickle')
             with open(pickle_filepath, 'wb') as pickle_file:
-                logging.info(f"Writing {trained_classifier.name} to pickle file...")
+                logging.debug(f"Writing {trained_classifier.name} to pickle file")
                 pickle.dump(trained_classifier.classifier, pickle_file,
                             protocol=pickle.HIGHEST_PROTOCOL)
 

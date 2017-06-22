@@ -1,3 +1,4 @@
+import logging
 import tweepy
 
 from data import DataSet
@@ -26,12 +27,13 @@ class KeywordStreamListener(tweepy.StreamListener):
                 self.queue.put((text.strip(), classification))
 
     def on_error(self, code):
-        print(f"ERROR: {code}")
+        logging.error(code)
 
 
 def start_tweepy(keyword, classifier, queue):
 
     with open('keys.txt') as file:
+        logging.debug("Reading Twitter keys from file")
         keys = [line.strip() for line in file.readlines()]
 
     auth = tweepy.OAuthHandler(keys[0], keys[1])
@@ -42,4 +44,5 @@ def start_tweepy(keyword, classifier, queue):
     stream_listener = KeywordStreamListener(classifier, queue)
     stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
 
+    logging.debug("Starting stream")
     stream.filter(track=[keyword], stall_warnings=True)

@@ -76,7 +76,7 @@ class DataSet:
 
         if DataSet.data_set is None:
             DataSet.data_set = DataSet._load_data()
-        logging.info("Returning cached data set.")
+        logging.debug("Returning cached data set.")
         return DataSet.data_set
 
     @staticmethod
@@ -85,7 +85,7 @@ class DataSet:
         training set and the list of all words that appear in the corpora."""
 
         start_time = time.time()
-        logging.info("Loading data set...")
+        logging.debug("Loading data set")
 
         # documents will be a list of tuples consisting of a body of text and its sentiment
         documents = []
@@ -111,7 +111,7 @@ class DataSet:
         # Pickle the data set to reduce future loading times
         DataSet._save_data_to_pickle(os.path.join('pickles', 'features.pickle'), word_list)
 
-        logging.info(f"Data loading complete. Time taken: {time.time()-start_time}\n")
+        logging.debug(f"Data loading complete. Time taken: {time.time()-start_time}\n")
         return data
 
     @staticmethod
@@ -119,7 +119,7 @@ class DataSet:
         """Loads reviews from the short movie review corpus. Creates tuples of
         review-sentiment pairs and appends them to documents."""
 
-        logging.info("Loading movie reviews...")
+        logging.debug("Loading movie reviews")
         short_pos = unidecode(open('positive.txt').read())
         short_neg = unidecode(open('negative.txt').read())
         for review in short_pos.split('\n'):
@@ -132,7 +132,7 @@ class DataSet:
         """Returns a list of all unique, 3+ char long words that are of a useful part of speech
         in documents."""
 
-        logging.info("Building word list...")
+        logging.debug("Building word list")
         all_words = [word_tokenize(document) for document, _ in documents]
         all_words = list({word.lower() for word in itertools.chain.from_iterable(all_words)
                          if len(word) > 2})
@@ -159,7 +159,7 @@ class DataSet:
         indicate whether the given word from word_list appears in the corresponding
         document."""
 
-        logging.info("Building featureset...")
+        logging.debug("Building featureset")
         return [(DataSet.find_features(document, word_list), sentiment)
                 for document, sentiment in documents]
 
@@ -178,7 +178,7 @@ class DataSet:
 
         data = None
         if os.path.isfile(pickle_filepath):
-            logging.info("Loading data from pickle...")
+            logging.debug("Loading data from pickle")
             with open(pickle_filepath, 'rb') as pickle_file:
                 data = pickle.load(pickle_file)
         return data
@@ -187,7 +187,7 @@ class DataSet:
     def _save_data_to_pickle(pickle_filepath, data):
         """Saves the given data object to a pickle file at the given filepath."""
 
-        logging.info("Writing pickle file...")
+        logging.debug("Writing pickle file")
         if not os.path.isdir('pickles'):
             os.mkdir('pickles')
         with open(pickle_filepath, 'wb') as pickle_file:

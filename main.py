@@ -1,10 +1,14 @@
+import logging
 import multiprocessing
 
 from graphing import graph
 from votingclassifier import VotingClassifier
 from streaming import start_tweepy
 
-KEYWORD = 'Trump'
+logging.basicConfig(level=logging.DEBUG,
+                    format=' %(asctime)s - %(levelname)s - %(funcName)-30s - %(message)s')
+
+KEYWORD = 'happy'
 
 
 def main():
