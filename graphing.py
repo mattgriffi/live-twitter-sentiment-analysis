@@ -1,3 +1,6 @@
+"""This module handles the output of the Twitter sentiment analysis. It creates the matplotlib
+graph and word cloud. It also handles processing the data after returned by the classifiers."""
+
 import logging
 import matplotlib
 import matplotlib.pyplot as plt
