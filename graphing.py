@@ -28,7 +28,7 @@ def graph(queue):
         _get_tweets(queue, recent_tweets)
         _get_average_sentiment(recent_tweets, average_sentiments)
         _update_sentiment_graph(sentiment_graph, average_sentiments)
-        _update_word_cloud(recent_tweets, word_cloud_generator, word_cloud)
+        _update_word_cloud(word_cloud, word_cloud_generator, recent_tweets)
 
 
 def _init_deques():
@@ -105,7 +105,7 @@ def _update_sentiment_graph(sentiment_graph, averages):
 
 
 @timer(WORDCLOUD_UPDATE_INTERVAL)
-def _update_word_cloud(recent_tweets, word_cloud_generator, word_cloud_plot):
+def _update_word_cloud(word_cloud_plot, word_cloud_generator, recent_tweets):
     """Updates word_cloud_plot using word_cloud_generator with text data from recent_tweets."""
 
     logging.debug(f"Updating word cloud (interval: {WORDCLOUD_UPDATE_INTERVAL} seconds)")
