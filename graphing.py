@@ -6,23 +6,27 @@ from contextlib import suppress
 from wordcloud import WordCloud, STOPWORDS
 
 
+WORDCLOUD_UPDATE_INTERVAL = 3
+
+
 def graph(queue):
 
-    most_recent_tweets = deque(['', 'pos']*100 + ['', 'neg']*100, maxlen=200)
+    most_recent_tweets = deque([('', 'pos')]*100 + [('', 'neg')]*100, maxlen=200)
     average_sentiments = deque([0.5]*100, maxlen=100)
 
     ax1, ax2 = _init_graphs()
-    word_cloud_generator = _get_word_cloud_generator
+    word_cloud_generator = _get_word_cloud_generator()
 
-    while True:
+    while plt.fignum_exists(1):
         _get_tweets(queue, most_recent_tweets)
+        _get_average_sentiment(most_recent_tweets, average_sentiments)
         _update_word_cloud(most_recent_tweets, word_cloud_generator, ax2)
         _update_sentiment_graph(ax1, average_sentiments)
 
 
-def _get_average_sentiment(recent_averages):
+def _get_average_sentiment(recent_tweets, recent_averages):
 
-        recent_sentiments = [tweet[1] for tweet in recent_averages]
+        recent_sentiments = [tweet[1] for tweet in recent_tweets]
         with suppress(ZeroDivisionError):
             average = recent_sentiments.count('pos') / len(recent_sentiments)
             recent_averages.append(average)
@@ -60,18 +64,23 @@ def _update_sentiment_graph(sentiment_graph, averages):
     plt.pause(0.05)
 
 
-def timer(func):
+def timer(interval):
 
-    if Timer.time is None or time.time()-Timer.time > 5:
-        Timer.time = time.time()
+    def decorator(func):
+        last_time = 0
 
-        def wrapper():
-            func()
+        def wrapper(*args, **kwargs):
+            nonlocal last_time
+            if time.time()-last_time > interval:
+                last_time = time.time()
+                func(*args, **kwargs)
 
         return wrapper
 
+    return decorator
 
-@timer
+
+@timer(WORDCLOUD_UPDATE_INTERVAL)
 def _update_word_cloud(recent_tweets, word_cloud_generator, word_cloud_plot):
 
     text = _get_text_from_tweets(recent_tweets)
@@ -91,7 +100,3 @@ def _get_word_cloud_generator():
 def _get_word_cloud(text, generator):
 
     return generator.generate(text)
-
-
-class Timer:
-    time = None
