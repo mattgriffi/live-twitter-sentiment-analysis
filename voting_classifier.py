@@ -1,15 +1,15 @@
-"""This classifier takes a list of machine learning classification algorithms. It is used to
+"""This classifier uses a list of machine learning classification algorithms. It is used to
 classify a text, then return a majority vote of the classifications determined by the multiple
 classifiers."""
 
 import statistics
 
 from nltk import ClassifierI
-from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.neural_network import MLPClassifier
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.neural_network import MLPClassifier
 
 from classifier_trainer import ClassifierTrainer
 
