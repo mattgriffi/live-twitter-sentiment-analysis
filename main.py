@@ -16,15 +16,14 @@ def main():
     classifier = VotingClassifier()
     queue = multiprocessing.Queue()
 
-    tweepy_process = multiprocessing.Process(target=start_tweepy,
-                                             args=(KEYWORD, classifier, queue))
-    matplotlib_process = multiprocessing.Process(target=graph,
-                                                 args=(queue,))
+    streaming_process = multiprocessing.Process(target=start_tweepy,
+                                                args=(KEYWORD, classifier, queue))
+    graphing_process = multiprocessing.Process(target=graph, args=(queue,))
 
-    tweepy_process.start()
-    matplotlib_process.start()
-    matplotlib_process.join()
-    tweepy_process.terminate()
+    streaming_process.start()
+    graphing_process.start()
+    graphing_process.join()
+    streaming_process.terminate()
 
 
 if __name__ == '__main__':
