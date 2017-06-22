@@ -5,7 +5,6 @@ import random
 import time
 
 from collections import deque
-from contextlib import suppress
 from wordcloud import WordCloud, STOPWORDS
 
 
