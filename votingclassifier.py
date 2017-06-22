@@ -11,7 +11,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 
-from classifier_trainer import ClassifierTrainer
+from trainer import ClassifierTrainer
 
 
 class VotingClassifier(ClassifierI):
