@@ -1,21 +1,26 @@
 import multiprocessing
 
+from graphing import graph
+from votingclassifier import VotingClassifier
+from streaming import start_tweepy
+
+KEYWORD = 'Trump'
+
 
 def main():
 
-    keyword = 'hate'
     classifier = VotingClassifier()
     queue = multiprocessing.Queue()
 
     tweepy_process = multiprocessing.Process(target=start_tweepy,
-                                             args=(keyword, classifier, queue))
-    matplotlib_process = multiprocessing.Process(target=start_matplotlib,
+                                             args=(KEYWORD, classifier, queue))
+    matplotlib_process = multiprocessing.Process(target=graph,
                                                  args=(queue,))
 
     tweepy_process.start()
     matplotlib_process.start()
-    tweepy_process.join()
     matplotlib_process.join()
+    tweepy_process.terminate()
 
 
 if __name__ == '__main__':
