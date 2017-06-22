@@ -18,21 +18,30 @@ def graph(queue):
     data pulled from the Twitter stream. This function must be called in a process separate
     from the Twitter stream."""
 
-    # These deques will only keep the most recent data. Initialized with temp data to
-    # make the graph start out at 0.5
-    temp_data = [('', 'pos')]*(MAX_TWEETS//2) + [('', 'neg')]*(MAX_TWEETS//2)
-    random.shuffle(temp_data)
-    most_recent_tweets = deque(temp_data, maxlen=MAX_TWEETS)
-    average_sentiments = deque([0.5]*MAX_AVERAGES, maxlen=MAX_AVERAGES)
+    # these are both fixed-size deques that only keep the most recent data
+    recent_tweets, average_sentiments = _init_deques()
 
     sentiment_graph, word_cloud = _init_graphs()
     word_cloud_generator = _get_word_cloud_generator()
 
     while plt.fignum_exists(1):
-        _get_tweets(queue, most_recent_tweets)
-        _get_average_sentiment(most_recent_tweets, average_sentiments)
+        _get_tweets(queue, recent_tweets)
+        _get_average_sentiment(recent_tweets, average_sentiments)
         _update_sentiment_graph(sentiment_graph, average_sentiments)
-        _update_word_cloud(most_recent_tweets, word_cloud_generator, word_cloud)
+        _update_word_cloud(recent_tweets, word_cloud_generator, word_cloud)
+
+
+def _init_deques():
+    """Initializes the tweet deque and averages deque with placeholder values. Returns them."""
+
+    # Fill the tweet deque half-and-half with pos and neg
+    temp_data = [('', 'pos')]*(MAX_TWEETS//2) + [('', 'neg')]*(MAX_TWEETS//2)
+    random.shuffle(temp_data)
+    tweets = deque(temp_data, maxlen=MAX_TWEETS)
+    # Fill the averages deque with 0.5's
+    averages = deque([0.5]*MAX_AVERAGES, maxlen=MAX_AVERAGES)
+
+    return tweets, averages
 
 
 def timer(interval):
