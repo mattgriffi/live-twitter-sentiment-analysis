@@ -65,7 +65,7 @@ def timer(interval):
     return decorator
 
 
-def _init_graphs(keyword):
+def _init_graphs():
     """Creates the figure and subplots for the sentiment graph and word cloud. Enables
     interactive mode. Returns the two subplots."""
 
@@ -102,7 +102,7 @@ def _update_sentiment_graph(sentiment_graph, averages, keyword):
 
     sentiment_graph.clear()
     sentiment_graph.plot([average for average in averages])
-    sentiment_graph.axis([0, 100, 0, 1])
+    sentiment_graph.axis([0, MAX_AVERAGES, 0, 1])
     sentiment_graph.set_title(f'Sentiment for keyword: {keyword}')
     sentiment_graph.set_ylabel('Sentiment')
 
@@ -139,5 +139,5 @@ def _get_word_cloud(text, generator):
 def _get_word_cloud_generator():
     """Returns a word cloud generator."""
 
-    stop_words = set((*STOPWORDS, 'http', 'https', 'co', 'de', 'es', 'el'))
+    stop_words = set((*STOPWORDS, 'http', 'https', 'co', 'de', 'es', 'el', 'em', 'os', 'da'))
     return WordCloud(background_color='white', stopwords=stop_words)
