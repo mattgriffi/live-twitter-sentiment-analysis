@@ -90,7 +90,7 @@ def _get_average_sentiment(recent_tweets, recent_averages):
     to recent_averages."""
 
     recent_sentiments = [tweet[1] for tweet in recent_tweets]
-    with suppress(ZeroDivisionError):
+    if len(recent_sentiments) > 0:
         average = recent_sentiments.count('pos') / len(recent_sentiments)
         recent_averages.append(average)
 
