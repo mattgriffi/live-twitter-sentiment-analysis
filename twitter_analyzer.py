@@ -35,7 +35,7 @@ class KeywordStreamListener(tweepy.StreamListener):
 
 def main():
 
-    keyword = 'Trump'
+    keyword = 'Apple'
     classifier = VotingClassifier()
     queue = multiprocessing.Queue()
 
@@ -52,14 +52,33 @@ def main():
 
 def start_matplotlib(queue):
 
-    while True:
-        while not queue.empty():
-            print(queue.get()[0])
+    most_recent_tweets = deque(maxlen=100)
+    average_sentiments = deque(maxlen=100)
 
-    # plt.figure(1)
-    # plt.plot()
-    # plt.show()
-    # stream.disconnect()
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    plt.ion()
+
+    while True:
+
+        while not queue.empty():
+            most_recent_tweets.append(queue.get())
+
+        sentiments = [tweet[1] for tweet in most_recent_tweets]
+
+        if len(sentiments) > 0:
+
+            average = sentiments.count('pos') / len(sentiments)
+            average_sentiments.append(average)
+
+            print(average_sentiments)
+
+            ax1.clear()
+            ax1.plot([average for average in average_sentiments])
+            ax1.axis([0, 100, 0, 1])
+
+            plt.draw()
+            plt.pause(0.01)
 
 
 def start_tweepy(keyword, classifier, queue):
