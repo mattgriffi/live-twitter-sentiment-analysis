@@ -1,4 +1,6 @@
+import logging
 import matplotlib.pyplot as plt
+import random
 import time
 
 from collections import deque
@@ -16,10 +18,11 @@ def graph(queue):
     data pulled from the Twitter stream. This function must be called in a process separate
     from the Twitter stream."""
 
-    # These deques will only keep the most recent data. Initialized with placeholder data to
+    # These deques will only keep the most recent data. Initialized with temp data to
     # make the graph start out at 0.5
-    most_recent_tweets = deque([('', 'pos')]*(MAX_TWEETS//2) + [('', 'neg')]*(MAX_TWEETS//2),
-                               maxlen=MAX_TWEETS)
+    temp_data = [('', 'pos')]*(MAX_TWEETS//2) + [('', 'neg')]*(MAX_TWEETS//2)
+    random.shuffle(temp_data)
+    most_recent_tweets = deque(temp_data, maxlen=MAX_TWEETS)
     average_sentiments = deque([0.5]*MAX_AVERAGES, maxlen=MAX_AVERAGES)
 
     sentiment_graph, word_cloud = _init_graphs()
@@ -54,6 +57,7 @@ def _init_graphs():
     """Creates the figure and subplots for the sentiment graph and word cloud. Enables
     interactive mode. Returns the two subplots."""
 
+    logging.debug("Loading matplotlib graphs")
     fig = plt.figure(figsize=(12, 10))
     top = fig.add_subplot(211)
     bot = fig.add_subplot(212)
@@ -95,12 +99,14 @@ def _update_sentiment_graph(sentiment_graph, averages):
 def _update_word_cloud(recent_tweets, word_cloud_generator, word_cloud_plot):
     """Updates word_cloud_plot using word_cloud_generator with text data from recent_tweets."""
 
+    logging.debug(f"Updating word cloud (interval: {WORDCLOUD_UPDATE_INTERVAL} seconds)")
     text = _get_text_from_tweets(recent_tweets)
 
-    word_cloud = _get_word_cloud(text, word_cloud_generator)
-    word_cloud_plot.clear()
-    word_cloud_plot.imshow(word_cloud, interpolation='bilinear')
-    word_cloud_plot.axis('off')
+    if text.strip():
+        word_cloud = _get_word_cloud(text, word_cloud_generator)
+        word_cloud_plot.clear()
+        word_cloud_plot.imshow(word_cloud, interpolation='bilinear')
+        word_cloud_plot.axis('off')
 
 
 def _get_text_from_tweets(recent_tweets):
