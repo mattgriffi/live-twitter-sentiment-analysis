@@ -9,7 +9,7 @@ from collections import namedtuple
 from streamlistener import KeywordStreamListener
 
 
-def start_tweepy(keyword, classifier, queue):
+def start_stream(keyword, classifier, queue):
     """Runs the tweepy stream to pull tweets containing the given keyword from Twitter."""
 
     stream = _get_stream(queue, classifier)

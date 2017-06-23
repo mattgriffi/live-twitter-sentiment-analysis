@@ -3,7 +3,7 @@ import multiprocessing
 
 from graphing import graph
 from votingclassifier import VotingClassifier
-from streaming import start_tweepy
+from streaming import start_stream
 
 logging.basicConfig(level=logging.DEBUG,
                     format=' %(asctime)s - %(levelname)s - %(funcName)-30s - %(message)s')
@@ -17,7 +17,7 @@ def main():
     classifier = VotingClassifier()
     queue = multiprocessing.Queue()
 
-    streaming_process = multiprocessing.Process(target=start_tweepy,
+    streaming_process = multiprocessing.Process(target=start_stream,
                                                 args=(KEYWORD, classifier, queue))
     graphing_process = multiprocessing.Process(target=graph, args=(queue, KEYWORD))
 
