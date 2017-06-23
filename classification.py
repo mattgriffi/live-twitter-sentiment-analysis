@@ -16,7 +16,7 @@ def start_classify(input_queue, output_queue):
     # I use a maxlen deque to ensure that we don't fall too far behind the stream. If the
     # stream is sending tweets faster than they can be classified, then some tweets will
     # be lost
-    tweets = deque(maxlen=20)
+    tweets = deque(maxlen=5)
     classifier = VotingClassifier()
 
     while True:
