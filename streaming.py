@@ -1,48 +1,53 @@
+"""This module handles the streaming of data from Twitter."""
+
+
 import logging
 import tweepy
 
-from data import DataSet
+from collections import namedtuple
 
-
-class KeywordStreamListener(tweepy.StreamListener):
-
-    def __init__(self, classifier, queue):
-        super().__init__()
-        self.classifier = classifier
-        self.queue = queue
-
-    def on_status(self, status):
-        try:
-            # Try to get the full text from extended tweets
-            text = status.extended_tweet['full_text'].strip()
-        except AttributeError:
-            # Fall back to normal text field for non-extended tweets
-            text = status.text.strip()
-        if not text.startswith('RT @'):
-            classification = self.classifier.classify(
-                DataSet.find_features(text, DataSet.get_feature_list()))
-            if self.classifier.get_most_recent_confidence() < 0.7:
-                classification = 'unsure'
-            if classification != 'unsure':
-                self.queue.put((text.strip(), classification))
-
-    def on_error(self, code):
-        logging.error(code)
+from streamlistener import KeywordStreamListener
 
 
 def start_tweepy(keyword, classifier, queue):
+    """Runs the tweepy stream to pull tweets containing the given keyword from Twitter."""
 
-    with open('keys.txt') as file:
-        logging.debug("Reading Twitter keys from file")
-        keys = [line.strip() for line in file.readlines()]
+    stream = _get_stream(queue, classifier)
 
-    auth = tweepy.OAuthHandler(keys[0], keys[1])
-    auth.set_access_token(keys[2], keys[3])
+    logging.debug('Starting stream')
+    stream.filter(track=[keyword], stall_warnings=True)
 
-    api = tweepy.API(auth)
+
+def _get_stream(queue, classifier):
+    """Returns a configured tweepy.Stream object."""
+
+    api = _get_tweepy_api()
 
     stream_listener = KeywordStreamListener(classifier, queue)
     stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
 
-    logging.debug("Starting stream")
-    stream.filter(track=[keyword], stall_warnings=True)
+    return stream
+
+
+def _get_tweepy_api():
+    """Returns a tweepy.API object with the necessary OAuth configs."""
+
+    keys = _get_keys_and_tokens()
+
+    auth = tweepy.OAuthHandler(keys.consumer, keys.consumer_secret)
+    auth.set_access_token(keys.access, keys.access_secret)
+
+    return tweepy.API(auth)
+
+
+def _get_keys_and_tokens():
+    """Returns a namedtuple of Twitter keys and access tokens read from the config file."""
+
+    KeysTuple = namedtuple('Keys', ['consumer', 'consumer_secret',
+                                    'access', 'access_secret'])
+
+    with open('keys.txt') as file:
+        logging.debug('Reading Twitter keys from file')
+        keys_list = [line.strip() for line in file]
+
+    return KeysTuple(*keys_list)
