@@ -1,14 +1,11 @@
 import logging
 import tweepy
 
-from data import DataSet
-
 
 class KeywordStreamListener(tweepy.StreamListener):
 
-    def __init__(self, classifier, queue):
+    def __init__(self, queue):
         super().__init__()
-        self.classifier = classifier
         self.queue = queue
 
     def on_status(self, status):
@@ -19,12 +16,7 @@ class KeywordStreamListener(tweepy.StreamListener):
             # Fall back to normal text field for non-extended tweets
             text = status.text.strip()
         if not text.startswith('RT @'):
-            classification = self.classifier.classify(
-                DataSet.find_features(text, DataSet.get_feature_list()))
-            if self.classifier.get_most_recent_confidence() < 0.7:
-                classification = 'unsure'
-            if classification != 'unsure':
-                self.queue.put((text.strip(), classification))
+            self.queue.put(text.strip())
 
     def on_error(self, code):
         logging.error(code)
