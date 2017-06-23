@@ -19,10 +19,13 @@ def main():
 
     streaming_process = multiprocessing.Process(target=start_stream,
                                                 args=(KEYWORD, stream_to_classify))
+
     classification_process = multiprocessing.Process(target=start_classify,
                                                      args=(stream_to_classify,
                                                            classify_to_graph))
-    graphing_process = multiprocessing.Process(target=start_graph, args=(classify_to_graph, KEYWORD))
+
+    graphing_process = multiprocessing.Process(target=start_graph,
+                                               args=(classify_to_graph, KEYWORD))
 
     streaming_process.start()
     classification_process.start()
