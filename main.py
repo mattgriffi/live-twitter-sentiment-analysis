@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 
 from classification import start_classify
-from graphing import graph
+from graphing import start_graph
 from streaming import start_stream
 
 logging.basicConfig(level=logging.DEBUG,
@@ -22,7 +22,7 @@ def main():
     classification_process = multiprocessing.Process(target=start_classify,
                                                      args=(stream_to_classify,
                                                            classify_to_graph))
-    graphing_process = multiprocessing.Process(target=graph, args=(classify_to_graph, KEYWORD))
+    graphing_process = multiprocessing.Process(target=start_graph, args=(classify_to_graph, KEYWORD))
 
     streaming_process.start()
     classification_process.start()

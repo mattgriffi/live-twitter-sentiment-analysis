@@ -16,7 +16,7 @@ MAX_TWEETS = 200
 MAX_AVERAGES = 100
 
 
-def graph(queue, keyword):
+def start_graph(queue, keyword):
     """Creates matplotlib figure and plots, then loops and continuously updates them with the
     data pulled from the Twitter stream. This function must be called in a process separate
     from the Twitter stream."""
