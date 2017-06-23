@@ -11,21 +11,21 @@ from streamlistener import KeywordStreamListener
 CONFIG = 'keys.txt'
 
 
-def start_stream(keyword, classifier, queue):
+def start_stream(keyword, queue):
     """Runs the tweepy stream to pull tweets containing the given keyword from Twitter."""
 
-    stream = _get_stream(queue, classifier)
+    stream = _get_stream(queue)
 
     logging.debug('Starting stream')
     stream.filter(track=[keyword], stall_warnings=True)
 
 
-def _get_stream(queue, classifier):
+def _get_stream(queue):
     """Returns a configured tweepy.Stream object."""
 
     api = _get_tweepy_api()
 
-    stream_listener = KeywordStreamListener(classifier, queue)
+    stream_listener = KeywordStreamListener(queue)
     stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
 
     return stream
