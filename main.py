@@ -31,6 +31,8 @@ def main():
     graphing_process.join()
     streaming_process.terminate()
     classification_process.terminate()
+    streaming_process.join()
+    classification_process.join()
 
 
 if __name__ == '__main__':
