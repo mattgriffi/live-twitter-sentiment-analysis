@@ -8,6 +8,8 @@ from collections import namedtuple
 
 from streamlistener import KeywordStreamListener
 
+CONFIG = 'keys.txt'
+
 
 def start_stream(keyword, classifier, queue):
     """Runs the tweepy stream to pull tweets containing the given keyword from Twitter."""
@@ -46,7 +48,7 @@ def _get_keys_and_tokens():
     KeysTuple = namedtuple('Keys', ['consumer', 'consumer_secret',
                                     'access', 'access_secret'])
 
-    with open('keys.txt') as file:
+    with open(CONFIG) as file:
         logging.debug('Reading Twitter keys from file')
         keys_list = [line.strip() for line in file]
 
