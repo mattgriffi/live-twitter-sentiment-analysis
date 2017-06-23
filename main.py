@@ -7,6 +7,7 @@ from streaming import start_tweepy
 
 logging.basicConfig(level=logging.DEBUG,
                     format=' %(asctime)s - %(levelname)s - %(funcName)-30s - %(message)s')
+# logging.disable(logging.CRITICAL)
 
 KEYWORD = 'happy'
 
