@@ -11,6 +11,7 @@ MIN_ALLOWED_CONFIDENCE = 0.7
 
 
 def start_classify(input_queue, output_queue):
+    """Pulls tweets from input_queue, classifies them, and puts the result in output_queue."""
 
     # I use a maxlen deque to ensure that we don't fall too far behind the stream. If the
     # stream is sending tweets faster than they can be classified, then some tweets will
