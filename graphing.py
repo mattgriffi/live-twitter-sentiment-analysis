@@ -5,6 +5,7 @@ import logging
 import matplotlib
 import matplotlib.pyplot as plt
 import random
+import string
 import time
 
 from collections import deque
@@ -114,7 +115,6 @@ def _update_sentiment_graph(sentiment_graph, averages, keyword):
 def _update_word_cloud(word_cloud_plot, word_cloud_generator, recent_tweets):
     """Updates word_cloud_plot using word_cloud_generator with text data from recent_tweets."""
 
-    logging.debug(f"Updating word cloud (interval: {WORDCLOUD_UPDATE_INTERVAL} seconds)")
     text = _get_text_from_tweets(recent_tweets)
 
     if text.strip():
@@ -139,5 +139,23 @@ def _get_word_cloud(text, generator):
 def _get_word_cloud_generator():
     """Returns a word cloud generator."""
 
-    stop_words = set((*STOPWORDS, 'http', 'https', 'co', 'de', 'es', 'el', 'em', 'os', 'da'))
-    return WordCloud(background_color='white', stopwords=stop_words)
+    stopwords = _get_stopwords()
+    return WordCloud(background_color='white', stopwords=stopwords)
+
+
+def _get_stopwords():
+    """Returns a set of stopwords that should be ignored in the word cloud."""
+
+    stopwords = list(STOPWORDS)
+
+    for word in ('http', 'https', 'amp'):
+        stopwords.append(word)
+
+    # Add 1 and 2 letter permutations. This helps exclude common foreign words, shortened
+    # url's, and so forth
+    for c1 in string.ascii_lowercase:
+        stopwords.append(c1)
+        for c2 in string.ascii_lowercase:
+            stopwords.append(c1 + c2)
+
+    return set(stopwords)
