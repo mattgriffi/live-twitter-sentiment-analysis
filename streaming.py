@@ -17,7 +17,12 @@ def start_stream(keyword, queue):
     stream = _get_stream(queue)
 
     logging.debug('Starting stream')
-    stream.filter(track=[keyword], stall_warnings=True)
+
+    while True:
+        try:
+            stream.filter(track=[keyword], stall_warnings=True)
+        except Exception as e:
+            logging.error(e)
 
 
 def _get_stream(queue):
