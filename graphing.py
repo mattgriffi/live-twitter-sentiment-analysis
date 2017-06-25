@@ -13,7 +13,7 @@ from collections import deque
 from wordcloud import WordCloud, STOPWORDS
 
 
-WORDCLOUD_UPDATE_INTERVAL = 3
+WORDCLOUD_UPDATE_INTERVAL = 5
 MAX_TWEETS = 200
 MAX_AVERAGES = 100
 
@@ -104,19 +104,21 @@ def _update_sentiment_graph(sentiment_graph, averages, keyword):
 
     sentiment_graph.clear()
 
-    sentiment_graph.plot([average for average in averages])
+    line, = sentiment_graph.plot([average for average in averages])
+
+    line.set_linewidth(2)
+    line.set_color('green')
 
     sentiment_graph.axis([0, MAX_AVERAGES, 0, 1])
-    sentiment_graph.set_title(f'Sentiment for keyword: {keyword}', fontdict={'fontsize': 20})
-    sentiment_graph.set_ylabel('Positivity', fontdict={'fontsize': 15})
+    sentiment_graph.set_title(f'Sentiment for Keyword: {keyword}', fontdict={'fontsize': 25})
+    sentiment_graph.set_ylabel('Positivity', fontdict={'fontsize': 20})
     sentiment_graph.set_yticks([x*0.25 for x in range(5)])
     sentiment_graph.set_yticklabels([f'{x}%' for x in range(0, 101, 25)])
     sentiment_graph.set_xticks([])
-    sentiment_graph.grid(axis='y', alpha=0.5)
+    sentiment_graph.grid(axis='y', alpha=0.4, linestyle='--')
     sentiment_graph.spines['right'].set_visible(False)
     sentiment_graph.spines['top'].set_visible(False)
 
-    # plt.draw()
     plt.pause(0.1)
 
 
