@@ -7,7 +7,7 @@ from data import DataSet
 from votingclassifier import VotingClassifier
 
 
-MIN_ALLOWED_CONFIDENCE = 0.7
+MIN_ALLOWED_CONFIDENCE = 0
 
 
 def start_classify(input_queue, output_queue):
@@ -47,6 +47,8 @@ def _classify_tweets(classifier, tweets):
 
         if confidence > MIN_ALLOWED_CONFIDENCE:
             classified_tweets.append((tweet, classification))
+
+    tweets.clear()
 
     return classified_tweets
 
