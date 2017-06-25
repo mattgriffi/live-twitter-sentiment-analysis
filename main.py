@@ -9,23 +9,29 @@ logging.basicConfig(level=logging.DEBUG,
                     format=' %(asctime)s - %(levelname)s - %(funcName)-30s - %(message)s')
 # logging.disable(logging.CRITICAL)
 
-KEYWORD = 'happy'
-
 
 def main():
+
+    print('This program takes a keyword, then pulls tweets that contain that keyword from '
+          'Twitter, passes them through a battery of machine learning classifiers to tag them '
+          'as either positive or negative, then graphs the results. The results are in the '
+          'form of a running-average graph and a word cloud of the most common words in the '
+          'most recent tweets.')
+
+    keyword = input('What keyword do you want to analyze? ').strip()
 
     stream_to_classify = multiprocessing.Queue()
     classify_to_graph = multiprocessing.Queue()
 
     streaming_process = multiprocessing.Process(target=start_stream,
-                                                args=(KEYWORD, stream_to_classify))
+                                                args=(keyword, stream_to_classify))
 
     classification_process = multiprocessing.Process(target=start_classify,
                                                      args=(stream_to_classify,
                                                            classify_to_graph))
 
     graphing_process = multiprocessing.Process(target=start_graph,
-                                               args=(classify_to_graph, KEYWORD))
+                                               args=(classify_to_graph, keyword))
 
     streaming_process.start()
     classification_process.start()
