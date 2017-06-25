@@ -13,7 +13,7 @@ from collections import deque
 from wordcloud import WordCloud, STOPWORDS
 
 
-WORDCLOUD_UPDATE_INTERVAL = 5
+WORDCLOUD_UPDATE_INTERVAL = 10
 MAX_TWEETS = 200
 MAX_AVERAGES = 100
 
@@ -54,7 +54,7 @@ def timer(interval):
     more often than every interval seconds."""
 
     def decorator(func):
-        last_time = 0
+        last_time = time.time() - 5
 
         def wrapper(*args, **kwargs):
             nonlocal last_time
@@ -151,7 +151,8 @@ def _get_word_cloud_generator():
     """Returns a word cloud generator."""
 
     stopwords = _get_stopwords()
-    return WordCloud(background_color='white', stopwords=stopwords)
+    return WordCloud(background_color='white', stopwords=stopwords, height=400, width=1000,
+                     min_font_size=9, prefer_horizontal=.8)
 
 
 def _get_stopwords():
