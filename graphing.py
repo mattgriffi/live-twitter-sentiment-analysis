@@ -40,7 +40,7 @@ def _init_deques():
     """Initializes the tweet deque and averages deque with placeholder values. Returns them."""
 
     # Fill the tweet deque half-and-half with pos and neg
-    temp_data = [('', 'pos')]*(MAX_TWEETS//2) + [('', 'neg')]*(MAX_TWEETS//2)
+    temp_data = [('', 'pos', 0.5)]*(MAX_TWEETS//2) + [('', 'neg', 0.5)]*(MAX_TWEETS//2)
     random.shuffle(temp_data)
     tweets = deque(temp_data, maxlen=MAX_TWEETS)
     # Fill the averages deque with 0.5's
@@ -93,9 +93,13 @@ def _get_average_sentiment(recent_tweets, recent_averages):
     """Calculates the average sentiment from the tweets in recent_tweets. Appends the average
     to recent_averages."""
 
-    recent_sentiments = [tweet[1] for tweet in recent_tweets]
+    recent_sentiments = [tweet for tweet in recent_tweets]
     if len(recent_sentiments) > 0:
-        average = recent_sentiments.count('pos') / len(recent_sentiments)
+        # tweet[1] is the sentiment of the tweet, pos or neg
+        # tweet[2] is the confidence score for the classification, 0..1
+        pos_weight = sum([tweet[2] for tweet in recent_tweets if tweet[1] == 'pos'])
+        neg_weight = sum([tweet[2] for tweet in recent_tweets if tweet[1] == 'neg'])
+        average = pos_weight / (pos_weight + neg_weight)
         recent_averages.append(average)
 
 

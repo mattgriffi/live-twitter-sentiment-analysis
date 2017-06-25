@@ -7,9 +7,6 @@ from data import DataSet
 from votingclassifier import VotingClassifier
 
 
-MIN_ALLOWED_CONFIDENCE = 0
-
-
 def start_classify(input_queue, output_queue):
     """Pulls tweets from input_queue, classifies them, and puts the result in output_queue."""
 
@@ -45,8 +42,7 @@ def _classify_tweets(classifier, tweets):
         classification = classifier.classify(features)
         confidence = classifier.get_most_recent_confidence()
 
-        if confidence > MIN_ALLOWED_CONFIDENCE:
-            classified_tweets.append((tweet, classification))
+        classified_tweets.append((tweet, classification, confidence))
 
     tweets.clear()
 
