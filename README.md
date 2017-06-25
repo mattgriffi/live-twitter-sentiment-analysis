@@ -41,22 +41,16 @@ This repository also contains pickle files. These pickles contain pre-trained ma
 
 ## Examples
 
-##### happy
-
 ![Example for the keyword "happy"](examples/happy.png)
 
-##### love
 
 ![Example for the keyword "love"](examples/love.png)
 
-##### hate
 
 ![Example for the keyword "hate"](examples/hate.png)
 
-##### Apple
 
 ![Example for the keyword "Apple"](examples/Apple.png)
 
-##### Trump
 
 ![Example for the keyword "Trump"](examples/Trump.png)
