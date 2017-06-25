@@ -9,6 +9,7 @@ import string
 import time
 
 from collections import deque
+
 from wordcloud import WordCloud, STOPWORDS
 
 
@@ -102,13 +103,21 @@ def _update_sentiment_graph(sentiment_graph, averages, keyword):
     """Redraws sentiment_graph with data from averages."""
 
     sentiment_graph.clear()
-    sentiment_graph.plot([average for average in averages])
-    sentiment_graph.axis([0, MAX_AVERAGES, 0, 1])
-    sentiment_graph.set_title(f'Sentiment for keyword: {keyword}')
-    sentiment_graph.set_ylabel('Sentiment')
 
-    plt.draw()
-    plt.pause(0.05)
+    sentiment_graph.plot([average for average in averages])
+
+    sentiment_graph.axis([0, MAX_AVERAGES, 0, 1])
+    sentiment_graph.set_title(f'Sentiment for keyword: {keyword}', fontdict={'fontsize': 20})
+    sentiment_graph.set_ylabel('Positivity', fontdict={'fontsize': 15})
+    sentiment_graph.set_yticks([x*0.25 for x in range(5)])
+    sentiment_graph.set_yticklabels([f'{x}%' for x in range(0, 101, 25)])
+    sentiment_graph.set_xticks([])
+    sentiment_graph.grid(axis='y', alpha=0.5)
+    sentiment_graph.spines['right'].set_visible(False)
+    sentiment_graph.spines['top'].set_visible(False)
+
+    # plt.draw()
+    plt.pause(0.1)
 
 
 @timer(WORDCLOUD_UPDATE_INTERVAL)
